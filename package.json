@@ -2,7 +2,7 @@
   "name": "xy-echarts",
   "version": "0.1.6",
   "description": "a vue project base on echarts",
-  "main": "dist/xy-echarts.umd.min.js",
+  "main": "lib/xy-echarts.umd.min.js",
   "private": false,
   "license": "MIT",
   "author": "Xyuan",
@@ -15,14 +15,15 @@
     "dev": "vue-cli-service serve --open",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "lib": "vue-cli-service build --target lib --name xy-echarts --dest dist packages/index.js"
+    "lib": "vue-cli-service build --target lib --name xy-echarts --dest lib packages/index.js"
   },
   "dependencies": {
     "core-js": "^3.6.5",
     "echarts": "^4.8.0",
     "loadsh": "0.0.4",
     "vue": "^2.6.11",
-    "vue-echarts": "^5.0.0-beta.0"
+    "vue-echarts": "^5.0.0-beta.0",
+    "vue-router": "^3.4.3"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.0",

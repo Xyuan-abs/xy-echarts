@@ -34,9 +34,9 @@ export default {
   name: 'XyChartBase',
   components: { ECharts },
   props: {
-    options: { type: Object, default: null },
-    hasData: { type: Boolean, default: false },
-    noDataMessage: { type: String, default: '暂无数据' },
+    options: { type: Object, default: null }, //自定义options
+    hasData: { type: Boolean, default: false }, //有无数据
+    noDataMessage: { type: String, default: '暂无数据' }, //没有数据时显示的提示文字
   },
   data() {
     return {
@@ -74,6 +74,9 @@ export default {
     },
     legendselectchanged(params) {
       this.$emit('legendselectchanged', params)
+    },
+    dispatchAction(params) {
+      this.$refs.echarts.dispatchAction(params)
     },
   },
 }

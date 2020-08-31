@@ -1,33 +1,30 @@
 <template>
   <div id="app">
-    <div class="box">
-      <xy-chart-line :list="list"></xy-chart-line>
+    <Head />
+    <div class="app-container">
+      <transition name="fade-transform" mode="out-in">
+        <router-view :key="key" />
+      </transition>
     </div>
-    <div class="box">
-      <xy-chart-base :options="options" :has-data="true"></xy-chart-base>
-    </div>
-    <div class="box">
-      <xy-chart-single-y :list="list">
-        <template v-slot:empty>
-          11111
-        </template>
-      </xy-chart-single-y>
-    </div>
-    <img alt="Vue logo" src="./assets/logo.png" />
-    <HelloWorld msg="Welcome to Your Vue.js App" />
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
-
+import Head from '@/views/Head'
 export default {
   name: 'App',
-  components: {
-    HelloWorld,
+  components: { Head },
+  computed: {
+    routers() {
+      return this.$router.options.routes.filter(d => d.hidden !== true)
+    },
+    key() {
+      return this.$route.path
+    },
   },
   data() {
     return {
+      active: 0,
       list: [
         {
           name: '平均',
@@ -59,20 +56,34 @@ export default {
       },
     }
   },
+  mounted() {},
+  methods: {
+    click(d, i) {
+      this.active = i
+      this.$router.push({
+        path: d.path,
+      })
+    },
+  },
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
-  .box {
-    height: 300px;
-    width: 400px;
+  overflow-x: hidden;
+  .app-container {
+    margin-top: 40px;
+    padding: 12px 8px;
+    > .flex {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      flex-flow: row wrap;
+    }
   }
 }
 </style>

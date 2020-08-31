@@ -57,8 +57,8 @@ export function setColorOpacity(color, opacity) {
     /* 颜色加透明度 */
     result = color + opacityStr
   } else if (color.startsWith('rgb(') || color.startsWith('hsl(')) {
-    let arr = color.split(')')
-    result = arr[0] + ',' + opacity + arr[1]
+    let arr = color.split(/\(|\)/g)
+    result = `${arr[0]}a(${arr[1]}, ${opacity})`
   } else {
     result = color
   }

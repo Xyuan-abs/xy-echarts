@@ -17,54 +17,55 @@
 //   ],
 // }
 
-export function optionsLineBase(unit) {
-  return {
-    /* title */
-    title: {
-      show: false,
-      textStyle: {
-        fontSize: 12,
-        color: '#8996a9',
-        fontWeight: '500',
-      },
-      rotate: -90,
-      top: 8,
-      left: 3,
+export const optionsBase = {
+  /* title */
+  title: {
+    show: false,
+    textStyle: {
+      fontSize: 12,
+      color: '#8996a9',
+      fontWeight: '500',
     },
-    /* grid */
-    grid: {
-      left: 15,
-      right: 35,
-      top: 45,
-      bottom: 10,
-      containLabel: true,
+    rotate: -90,
+    top: 8,
+    left: 3,
+  },
+  /* grid */
+  grid: {
+    left: 15,
+    right: 35,
+    top: 45,
+    bottom: 10,
+    containLabel: true,
+  },
+  /* legend */
+  legend: {
+    show: true,
+    type: 'scroll',
+    itemWidth: 18,
+    width: '90%',
+    height: '90%',
+    top: 8,
+    left: 'center',
+    textStyle: {
+      color: '#8996a9',
     },
-    /* legend */
-    legend: {
-      show: true,
-      type: 'scroll',
-      itemWidth: 18,
-      width: '100%',
-      top: 8,
-      left: 'center',
-      textStyle: {
-        color: '#8996a9',
-      },
-      selectedMode: true,
-      selected: [],
-      data: [],
+    selectedMode: true,
+    selected: [],
+    data: [],
+  },
+  /* tooltip */
+  tooltip: {
+    axisPointer: {
+      type: 'none',
     },
-    /* tooltip */
-    tooltip: {
-      axisPointer: {
-        type: 'none',
-      },
-      textStyle: {
-        align: 'left',
-      },
-      padding: 10,
-      backgroundColor: 'rgba(51,51,51,0.98)',
-    },
+    padding: 8,
+    backgroundColor: 'rgba(51,51,51,0.98)',
+  },
+}
+
+export function optionsSingleYBase(unit) {
+  return Object.assign({}, optionsBase, {
     /* xAxis */
     xAxis: {
       type: 'category',
@@ -89,50 +90,39 @@ export function optionsLineBase(unit) {
       data: [],
     },
     /* yAxis */
-    yAxis: [
-      {
-        type: 'value',
-        axisLine: {
-          show: false,
-        },
-        axisTick: {
-          show: false,
-        },
-        axisLabel: {
-          color: '#8996a9',
-          formatter(val) {
-            return getyUnit(val, unit)
-          },
-        },
-        splitLine: {
-          lineStyle: {
-            color: '#efefef',
-          },
+    yAxis: {
+      type: 'value',
+      axisLine: {
+        show: false,
+      },
+      axisTick: {
+        show: false,
+      },
+      axisLabel: {
+        color: '#8996a9',
+        formatter(val) {
+          return getyUnit(val, unit)
         },
       },
-      {
-        type: 'value',
-        nameTextStyle: {
-          color: '#8996a9',
-          align: 'center',
-        },
-        nameLocation: 'center',
-        nameRotate: 90,
-        axisLine: {
-          show: false,
-        },
-        axisTick: {
-          show: false,
-        },
-        axisLabel: {
-          show: false,
-        },
-        splitLine: {
-          show: false,
+      splitLine: {
+        lineStyle: {
+          color: '#efefef',
         },
       },
-    ],
-  }
+    },
+  })
+}
+
+export const hiddenAxis = {
+  axisLine: {
+    show: false,
+  },
+  axisTick: {
+    show: false,
+  },
+  splitLine: {
+    show: false,
+  },
 }
 
 /* 格式化y轴值显示 */

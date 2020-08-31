@@ -52,7 +52,7 @@ import ECharts from 'vue-echarts'
 import XyChartBase from '../../chart-base/src/main'
 
 import { colors, seriesLine, seriesBar, seriesScatter } from '../../../utils/echartsCommon'
-import { optionsLineBase, getTooltipFmt } from '../../../utils/echartsConfig'
+import { optionsSingleYBase, hiddenAxis, getTooltipFmt } from '../../../utils/echartsConfig'
 import { setColorOpacity } from '../../../utils/common'
 
 /* lodash 按需引入 */
@@ -89,8 +89,8 @@ const defaultBarConfig = {
 const defaultScatterConfig = {
   symbol: 'circle',
   shadowColor: 'rgba(120, 36, 50, 0.5)',
-  shadowBlur: 10,
-  shadowOffsetY: 5,
+  shadowBlur: 4,
+  shadowOffsetY: 2,
 }
 export default {
   name: 'XyChartSingleY',
@@ -117,12 +117,15 @@ export default {
           // }
         ]
       },
-    },
-    options: { type: Object, default: () => ({}) },
-    unit: { type: String, default: '单位：万元' },
+    }, //data
+    options: { type: Object, default: () => ({}) }, //自定义options
+    colors: { type: Array, default: colors }, //颜色表
+    unit: { type: String, default: '单位：万元' }, //单位
     dataType: { type: String, default: null }, //可选值 date
-    noDataMessage: { type: String, default: '暂无数据' },
-    labelPosition: { type: String, default: null },
+    labelPosition: { type: String, default: null }, //是否显示label，及label位置 作用于柱状图
+    isRow: { type: Boolean, default: false }, //是否为横向，一般作用于柱状图
+    hiddenAxisLine: { type: Boolean, default: false }, //是否隐藏轴线
+    noDataMessage: { type: String, default: '暂无数据' }, //没有数据时显示的提示文字
   },
   data() {
     return {
@@ -191,21 +194,29 @@ export default {
         tooltip: Object.assign(
           {
             trigger: defaultConfig.tooltipTrigger, //'axis'
-            axisPointer: {
-              type: 'none',
-            },
             backgroundColor: defaultConfig.tooltipBgcolor,
           },
           getTooltipFmt(defaultConfig.tooltipTrigger)
         ),
-        xAxis: {
-          data: this.getXAxisData(),
-        },
+        xAxis: Object.assign(
+          {
+            type: this.isRow ? 'value' : 'category',
+            data: this.isRow ? null : this.getXAxisData(),
+          },
+          this.hiddenAxisLine ? hiddenAxis : {}
+        ),
+        yAxis: Object.assign(
+          {
+            type: this.isRow ? 'category' : 'value',
+            data: this.isRow ? this.getXAxisData() : null,
+          },
+          this.hiddenAxisLine ? hiddenAxis : {}
+        ),
         series: this.getSeries(),
       }
       this.optionsResult = merge(
         {},
-        optionsLineBase(this.unit), //基本options
+        optionsSingleYBase(this.unit), //基本options
         options, //生成的options
         this.options //外部传入的options
       )
@@ -252,7 +263,7 @@ export default {
             color = item.color
             hasColorNum++
           } else {
-            color = colors[index - hasColorNum]
+            color = this.colors[index - hasColorNum]
           }
           const bgcolor = item.bgcolor ? item.bgcolor : color
           /* 单个节点配置 */
@@ -265,6 +276,11 @@ export default {
                 itemStyle: {
                   color: d.color,
                 },
+                emphasis: {
+                  itemStyle: {
+                    color: d.color,
+                  },
+                },
               })
             }
             /* 公共信息 */
@@ -272,6 +288,23 @@ export default {
               d.info = item.info
             }
           })
+          /* 横向柱状图颜色渐变 */
+          if (item.isGradient) {
+            let gradientColor = this.setGradientColor(color, item.data.length)
+            item.data.forEach((d, i) => {
+              Object.assign(d, {
+                itemStyle: {
+                  color: gradientColor[i],
+                },
+                emphasis: {
+                  itemStyle: {
+                    color: gradientColor[i],
+                  },
+                },
+              })
+            })
+          }
+
           result.push(
             merge({}, this.getSerieItem(item, color, bgcolor), {
               data: item.data,
@@ -374,9 +407,9 @@ export default {
       /* 配置阴影 */
       if (item.hasShadow) {
         Object.assign(result.itemStyle, {
-          shadowBlur: item.shadowBlur || defaultScatterConfig.shadowBlur, //10
+          shadowBlur: item.shadowBlur || defaultScatterConfig.shadowBlur, //4
           shadowColor: defaultScatterConfig.shadowColor, //rgba(120, 36, 50, 0.5)
-          shadowOffsetY: item.shadowOffsetY || defaultScatterConfig.shadowOffsetY, //5
+          shadowOffsetY: item.shadowOffsetY || defaultScatterConfig.shadowOffsetY, //2
         })
       }
       /* 配置颜色 */
@@ -390,7 +423,11 @@ export default {
     setColor(color, type = 'Linear') {
       const colorArr = Array.isArray(color) ? color : [color, color]
       if (type === 'Linear') {
-        return new ECharts.graphic.LinearGradient(0, 0, 0, 1, [
+        let derection = [0, 0, 0, 1] // 左 上 右 下
+        if (this.isRow) {
+          derection = [0, 0, 1, 0]
+        }
+        return new ECharts.graphic.LinearGradient(...derection, [
           {
             offset: 0,
             color: colorArr[0],
@@ -404,16 +441,23 @@ export default {
         return new ECharts.graphic.RadialGradient(0.4, 0.3, 1, [
           {
             offset: 0,
-            color: 'rgb(251, 118, 123)',
+            color: colorArr[0],
           },
           {
             offset: 1,
-            color: 'rgb(204, 46, 72)',
+            color: colorArr[1],
           },
         ])
       } else {
         return Array.isArray(color) ? color[0] : color
       }
+    },
+    setGradientColor(color, length) {
+      let result = []
+      for (let i = 0; i < length; i++) {
+        result.push(setColorOpacity(color, ((i + 1) / length).toFixed(2)))
+      }
+      return result
     },
     /* 事件 */
     legendselectchanged(val) {

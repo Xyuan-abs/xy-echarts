@@ -1,10 +1,10 @@
-### Install
+## Install
 
 ```
 npm i xy-echarts -S
 ```
 
-### Quick Start
+## Quick Start
 
 ```javascript
 import Vue from 'vue'
@@ -20,6 +20,14 @@ import {
 Vue.component(Line.name, Line)
 ```
 
-### To Do
+## Quick Start
+
+###
+
+```
+<>
+```
+
+## To Do
 
 - support more type of echarts
