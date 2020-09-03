@@ -113,8 +113,8 @@ export const seriesScatter = {
 }
 
 //
-export const seriesBoxplot = {
-  type: 'boxplot',
+export const seriesPictorialBar = {
+  type: 'pictorialBar',
   data: [],
   itemStyle: {},
   label: {},

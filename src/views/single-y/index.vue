@@ -169,7 +169,7 @@ export default {
             type: 'bar',
             isRow: true,
             withBg: true,
-            isGradient: true,
+            isBarsGradient: true,
           },
         ],
         [
@@ -231,6 +231,20 @@ export default {
             ],
             type: 'scatter',
             hasShadow: true,
+          },
+        ],
+        [
+          {
+            name: 'pictorialBar',
+            data: [
+              { name: '1月', value: 8 },
+              { name: '2月', value: 12 },
+              { name: '3月', value: 7 },
+              { name: '4月', value: 13 },
+            ],
+            type: 'pictorialBar',
+            color: ['#ff9c26', '#00e2b6'],
+            isGradient: true,
           },
         ],
       ],

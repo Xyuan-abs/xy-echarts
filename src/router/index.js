@@ -22,17 +22,17 @@ const routes = [
     },
   },
   {
-    path: '/bar',
-    component: () => import('@/views/bar'),
-    mate: {
-      title: 'Bar',
-    },
-  },
-  {
     path: '/pie',
     component: () => import('@/views/pie'),
     mate: {
       title: 'Pie',
+    },
+  },
+  {
+    path: '/others',
+    component: () => import('@/views/others'),
+    mate: {
+      title: 'Others',
     },
   },
   {

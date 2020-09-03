@@ -26,7 +26,6 @@
 import XyChartBase from '../../chart-base/src/main'
 
 import { optionsBase, getTooltipFmt } from '../../../utils/echartsConfig'
-import { setColorOpacity } from '../../../utils/common'
 
 /* lodash 按需引入 */
 import merge from 'lodash/merge'
@@ -83,14 +82,14 @@ export default {
     colors: {
       type: Array,
       default: () => [
-        'rgb(8, 133, 255)',
-        'rgb(255, 102, 94)',
-        'rgb(246, 148, 33)',
-        'rgb(29, 207, 47)',
-        'rgb(0, 189, 152)',
-        'rgb(0, 188, 212)',
+        'hsl(210, 100%, 51.6%)',
+        'hsl(3, 100.0%, 68.4%)',
+        'hsl(32, 92.2%, 54.7%)',
+        'hsl(126, 75.4%, 46.3%)',
+        'hsl(168, 100.0%, 37.1%)',
+        'hsl(187, 100.0%, 41.6%)',
       ],
-    }, //颜色表  link模式不支持HEX模式->#...
+    }, //颜色表  link模式只支持hsl格式
     isLink: { type: Boolean, default: true }, //内外颜色是否同一色系
     showLegend: { type: Boolean, default: true }, //是否显示legend
     legendPosition: { type: String, default: 'left' }, //legend位置
@@ -247,10 +246,20 @@ export default {
       return result
     },
     setGradientColor(color, length) {
+      if (!color.startsWith('hsl(')) {
+        console.error('PieNested link模型的colors目前只支持hsl格式')
+        return new Array(length).fill(color)
+      }
+      let [h, s, l] = color.split(',')
+      let lnum = Number(l.split('%)')[0])
+
+      let step = ((100 - lnum) / length).toFixed(2)
       let result = []
       for (let i = 0; i < length; i++) {
-        result.push(setColorOpacity(color, ((i + 1) / length).toFixed(2)))
+        let hsl = `${h},${s},${(lnum + step * i).toFixed(2)}%)`
+        result.push(hsl)
       }
+
       return result
     },
     /* 事件 */

@@ -124,7 +124,7 @@ export default {
         },
         tooltip: Object.assign(
           {
-            show: false,
+            show: true,
             trigger: 'item', //'axis'
           },
           getTooltipFmt('item')
@@ -154,23 +154,24 @@ export default {
               show: true,
               interval: 0,
               inside: true,
-              verticalAlign: 'bottom',
+              verticalAlign: 'center',
               fontSize: 12,
               lineHeight: 14,
               color: '#8996a9',
               formatter: (params, i) => {
-                let item = this.listResult[0].data[i]
-                console.log(params, i)
-                // debugger
-                return (
-                  item.name +
-                  ' ' +
-                  item.value +
-                  this.unit?.split(/:|：/)[1] +
-                  ' ' +
-                  ((item.value / this.max) * 100).toFixed(2) +
-                  '%'
-                )
+                if (params === '') {
+                  return ''
+                } else {
+                  let index = Math.floor(i / 2)
+                  let item = this.listResult[0].data[index]
+                  return (
+                    item.label ||
+                    `${item.name} ${item.value + this.unit?.split(/:|：/)[1]} ${(
+                      (item.value / this.max) *
+                      100
+                    ).toFixed(2)}%`
+                  )
+                }
               },
             },
             data: this.getyAxisData(),
@@ -195,9 +196,9 @@ export default {
       return result
     },
     getyAxisData() {
-      return this.listResult?.[0].data.map(d => {
-        return d.value
-      })
+      return this.listResult?.[0].data.reduce((prev, cur) => {
+        return prev.concat(['', cur.value])
+      }, [])
     },
     getSeries() {
       if (this.listResult.length === 0) return false
@@ -216,21 +217,12 @@ export default {
           clockwise: false,
           label: {
             show: false,
-            position: 'inside',
-            formatter(val) {
-              if (val.name) {
-                return val.data.label || val.percent + '%'
-              } else {
-                return ''
-              }
-            },
           },
           emphasis: {
             itemStyle: {
               color: this.colors[i],
             },
           },
-          cursor: 'default',
           data: this.getSeriesData(i),
         }
       })
@@ -252,6 +244,10 @@ export default {
               color: this.bgColor,
             },
           },
+          cursor: 'default',
+          tooltip: {
+            show: false,
+          },
         },
         {
           name: '',
@@ -263,6 +259,10 @@ export default {
             itemStyle: {
               color: 'transparent',
             },
+          },
+          cursor: 'default',
+          tooltip: {
+            show: false,
           },
         },
       ]

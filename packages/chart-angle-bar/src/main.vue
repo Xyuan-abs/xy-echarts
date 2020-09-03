@@ -55,6 +55,7 @@ export default {
     color: { type: String, default: '#67C23A' }, //柱状图颜色
     angleAxisColor: { type: String, default: '#8996a9' }, //极轴坐标颜色
     radiusAxisColor: { type: String, default: '#DCDFE6' }, //环形轴坐标颜色
+    isBgGradient: { type: Boolean, default: false }, //背景是否渐变
     noDataMessage: { type: String, default: '暂无数据' }, //没有数据时显示的提示文字
   },
   data() {
@@ -183,7 +184,25 @@ export default {
               show: false,
             },
             itemStyle: {
-              color: setColorOpacity(this.color, 0.2),
+              color: this.isBgGradient
+                ? {
+                    type: 'radial',
+                    x: 0.5,
+                    y: 0.5,
+                    r: 0.7,
+                    colorStops: [
+                      {
+                        offset: 0,
+                        color: 'rgba(255,255,255,0)',
+                      },
+                      {
+                        offset: 1,
+                        color: this.color,
+                      },
+                    ],
+                    globalCoord: false,
+                  }
+                : setColorOpacity(this.color, 0.2),
               borderColor: this.color,
               borderWidth: 1,
             },

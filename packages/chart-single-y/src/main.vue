@@ -9,7 +9,7 @@
         data: [ 
           { name: '', value: ''} // x轴标签名 值
         ],
-        color: 'rgb(118,252,254)', // item的颜色
+        color: 'rgb(118,252,254)', // item的颜色 为数组时item颜色渐变，一般作用于bar、pictorialBar
         stack: 'stack', // 堆叠标识,用于标识堆叠数据
         withBg: false, // 是否有背景
         bgColor: 'rgb(5,126,118)', // line面积图/柱状图背景色   渐变则为数组[rgb(5,126,118),rgb(5,126,118)] 不填则为color+透明度
@@ -24,10 +24,15 @@
 
         // 以下为bar配置
         barRadius:0, // 圆角
+        isBarsGradient:false//是否所有bar以一种颜色渐变
 
         // 以下为scatter配置
         symbol: 'circle',//点的形状
         hasShadow:false, // 阴影
+
+        // 以下为pictorialBar配置
+        symbol: 'path://M0,10 L10,10 C5.5,10 5.5,5 5,0 C4.5,5 4.5,10 0,10 z',//symbol形状
+        isGradient:false, // pictorialBar颜色是都渐变（只有color不为数组时生效）
       }]
 -->
 <template>
@@ -51,7 +56,13 @@
 import ECharts from 'vue-echarts'
 import XyChartBase from '../../chart-base/src/main'
 
-import { colors, seriesLine, seriesBar, seriesScatter } from '../../../utils/echartsCommon'
+import {
+  colors,
+  seriesLine,
+  seriesBar,
+  seriesScatter,
+  seriesPictorialBar,
+} from '../../../utils/echartsCommon'
 import { optionsSingleYBase, hiddenAxis, getTooltipFmt } from '../../../utils/echartsConfig'
 import { setColorOpacity } from '../../../utils/common'
 
@@ -92,6 +103,12 @@ const defaultScatterConfig = {
   shadowBlur: 4,
   shadowOffsetY: 2,
 }
+
+/* pictorialBar默认配置 */
+const defaultPictorialBarConfig = {
+  symbol: 'path://M0,10 L10,10 C5.5,10 5.5,5 5,0 C4.5,5 4.5,10 0,10 z',
+}
+
 export default {
   name: 'XyChartSingleY',
   components: {
@@ -119,7 +136,7 @@ export default {
       },
     }, //data
     options: { type: Object, default: () => ({}) }, //自定义options
-    colors: { type: Array, default: colors }, //颜色表
+    colors: { type: Array, default: () => colors }, //颜色表
     unit: { type: String, default: '单位：万元' }, //单位
     dataType: { type: String, default: null }, //可选值 date
     labelPosition: { type: String, default: null }, //是否显示label，及label位置 作用于柱状图
@@ -155,11 +172,11 @@ export default {
   methods: {
     init() {
       this.listResult = cloneDeep(this.list).map(d => d) //深度拷贝list
-      this.formatterX() //补全x轴数据
+      this.completionX() //补全x轴数据
       this.render() //配置echarts图表
     },
     /* 补全x轴数据 */
-    formatterX() {
+    completionX() {
       /* 获取到所有data里的name */
       let all = this.listResult.reduce((prev, cur) => {
         let names = cur.data.map(d => d.name)
@@ -170,18 +187,14 @@ export default {
       /* 补全 */
       this.listResult.forEach(d => {
         if (d.data.length !== filter.length) {
-          filter.forEach(v => {
+          filter.forEach((v, i) => {
             if (!d.data.find(o => o.name === v)) {
-              d.data.push({
+              d.data.splice(i, 0, {
                 name: v,
                 value: null,
               })
             }
           })
-          /* 若x轴为日期类型 则按先后顺序排序 */
-          if (this.dataType === 'date') {
-            d.data.sort((a, b) => a.name.localeCompare(b.name))
-          }
         }
       })
     },
@@ -225,7 +238,7 @@ export default {
     /* 获取所有图例data */
     getLegendData() {
       let result = []
-      if (this.listResult) {
+      if (this.listResult.length) {
         result = this.listResult.filter(d => d.name && d.name !== 'hidden').map(d => d.name)
       }
       return result
@@ -233,7 +246,7 @@ export default {
     /* 设置图例默认全选 */
     getLegendSelected() {
       let result = []
-      if (this.listResult) {
+      if (this.listResult.length) {
         result = this.listResult
           .filter(d => d.name && d.name !== 'hidden')
           .reduce((prev, cur) => {
@@ -274,11 +287,11 @@ export default {
             if (d && d.color) {
               Object.assign(d, {
                 itemStyle: {
-                  color: d.color,
+                  color: this.setColor(d.color),
                 },
                 emphasis: {
                   itemStyle: {
-                    color: d.color,
+                    color: this.setColor(d.color),
                   },
                 },
               })
@@ -289,7 +302,7 @@ export default {
             }
           })
           /* 横向柱状图颜色渐变 */
-          if (item.isGradient) {
+          if (item.isBarsGradient) {
             let gradientColor = this.setGradientColor(color, item.data.length)
             item.data.forEach((d, i) => {
               Object.assign(d, {
@@ -307,8 +320,8 @@ export default {
 
           result.push(
             merge({}, this.getSerieItem(item, color, bgcolor), {
-              data: item.data,
               name: item.name,
+              data: item.data,
             })
           )
         })
@@ -328,6 +341,9 @@ export default {
         case 'scatter':
           result = this.setScatter(item, color)
           break
+        case 'pictorialBar':
+          result = this.setPictorialBar(item, color)
+          break
       }
       return result
     },
@@ -335,7 +351,7 @@ export default {
       let result = cloneDeep(seriesLine)
 
       /* line相关配置 */
-      result.color = color
+      result.color = this.setColor(color, 'Linear', [0, 0, 1, 0])
       result.symbolSize = defaultLineConfig.symbolSize //4
       result.emphasis = {
         itemStyle: {
@@ -420,10 +436,26 @@ export default {
       result.stack = item.stack || defaultLineConfig.stack // null
       return result
     },
-    setColor(color, type = 'Linear') {
+    setPictorialBar(item, color) {
+      let result = cloneDeep(seriesPictorialBar)
+      result.symbol = item.symbol || defaultPictorialBarConfig.symbol
+      /* 柱子颜色 */
+      if (!Array.isArray(color) && item.isGradient) {
+        color = [color, setColorOpacity(color, 0.1)]
+      }
+      result.itemStyle.color = this.setColor(color)
+
+      return result
+    },
+    /**
+     * 给颜色加透明度
+     * @param {String|Array} color
+     * @param {String} type
+     * @param {Array} derection [0, 0, 0, 1] 左 上 右 下
+     */
+    setColor(color, type = 'Linear', derection = [0, 0, 0, 1]) {
       const colorArr = Array.isArray(color) ? color : [color, color]
       if (type === 'Linear') {
-        let derection = [0, 0, 0, 1] // 左 上 右 下
         if (this.isRow) {
           derection = [0, 0, 1, 0]
         }

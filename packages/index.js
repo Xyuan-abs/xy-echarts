@@ -5,16 +5,13 @@ import Pie from './chart-pie'
 import PieNested from './chart-pie-nested'
 import PieRose from './chart-pie-rose'
 import PieYujue from './chart-pie-yujue'
+import Radar from './chart-radar'
 
-/* echarts vue-echarts按需引入 */
+/* echarts vue-echarts引入 */
 import 'echarts'
 /* 按需引入 */
-import 'echarts/lib/chart/line'
-import 'echarts/lib/chart/bar'
-import 'echarts/lib/chart/scatter'
-import 'echarts/lib/chart/pie'
 
-const components = [Base, SingleY, AngleBar, Pie, PieNested, PieRose, PieYujue]
+const components = [Base, SingleY, AngleBar, Pie, PieNested, PieRose, PieYujue, Radar]
 
 const install = function(Vue) {
   components.forEach(component => {
@@ -35,4 +32,5 @@ export default {
   PieNested,
   PieRose,
   PieYujue,
+  Radar,
 }

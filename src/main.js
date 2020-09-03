@@ -7,26 +7,26 @@ import '@/style/index.scss'
 Vue.config.productionTip = false
 
 /* echarts vue-echarts按需引入 */
-import 'echarts'
+// import 'echarts'
 
 /* 按需引入 */
-import 'echarts/lib/chart/line'
-import 'echarts/lib/chart/bar'
+// import 'echarts/lib/chart/line'
+// import 'echarts/lib/chart/bar'
 
 // import XyEcharts from '../packages/index'
 // console.log(XyEcharts)
 // Vue.use(XyEcharts)
 
 import XyEcharts from '../packages/index'
-let { Line, Base, SingleY, AngleBar, Pie, PieNested, PieRose, PieYujue } = XyEcharts
+let { Base, SingleY, AngleBar, Pie, PieNested, PieRose, PieYujue, Radar } = XyEcharts
 Vue.use(Base)
-Vue.use(Line)
 Vue.use(SingleY)
 Vue.use(AngleBar)
 Vue.use(Pie)
 Vue.use(PieNested)
 Vue.use(PieRose)
 Vue.use(PieYujue)
+Vue.use(Radar)
 
 // import { Line } from '../packages/index'
 // console.log(Line)

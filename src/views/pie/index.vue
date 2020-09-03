@@ -94,6 +94,8 @@ export default {
             { name: '2月', value: 10 },
             { name: '3月', value: 13 },
             { name: '4月', value: 10 },
+            { name: '5月', value: 13 },
+            { name: '6月', value: 10 },
           ],
         },
       ],
