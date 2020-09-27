@@ -1,15 +1,15 @@
 <template>
   <div class="pie-box flex">
-    <card-panel :title="'Pie'" class="pie">
+    <card-panel :title="'Pie'" class="pie" :code="list">
       <xy-chart-pie :list="list" :title="'标题\n2020年8月31日'"></xy-chart-pie>
     </card-panel>
-    <card-panel :title="'内嵌pie'" class="pie-nested">
+    <card-panel :title="'内嵌pie'" class="pie-nested" :code="listNested">
       <xy-chart-pie-nested :list="listNested"></xy-chart-pie-nested>
     </card-panel>
-    <card-panel :title="'玫瑰图'" class="pie-nested">
+    <card-panel :title="'玫瑰图'" class="pie-nested" :code="listRose">
       <xy-chart-pie-rose :list="listRose"></xy-chart-pie-rose>
     </card-panel>
-    <card-panel :title="'玉玦图'" class="pie-nested">
+    <card-panel :title="'玉玦图'" class="pie-nested" :code="listYujue">
       <xy-chart-pie-yujue :list="listYujue"></xy-chart-pie-yujue>
     </card-panel>
   </div>

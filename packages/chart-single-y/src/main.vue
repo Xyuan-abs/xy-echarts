@@ -53,7 +53,6 @@
 </template>
 <script>
 /* echarts图表相关 */
-import ECharts from 'vue-echarts'
 import XyChartBase from '../../chart-base/src/main'
 
 import {
@@ -64,7 +63,7 @@ import {
   seriesPictorialBar,
 } from '../../../utils/echartsCommon'
 import { optionsSingleYBase, hiddenAxis, getTooltipFmt } from '../../../utils/echartsConfig'
-import { setColorOpacity } from '../../../utils/common'
+import { setColorOpacity, setColor } from '../../../utils/common'
 
 /* lodash 按需引入 */
 import merge from 'lodash/merge'
@@ -218,18 +217,32 @@ export default {
           },
           this.hiddenAxisLine ? hiddenAxis : {}
         ),
-        yAxis: Object.assign(
+        yAxis: [
+          Object.assign(
+            {
+              name: this.unit,
+              nameLocation: 'end',
+              nameTextStyle: {
+                color: '#8996a9',
+              },
+              type: this.isRow ? 'category' : 'value',
+              data: this.isRow ? this.getXAxisData() : null,
+            },
+            this.hiddenAxisLine ? hiddenAxis : {}
+          ),
           {
-            type: this.isRow ? 'category' : 'value',
-            data: this.isRow ? this.getXAxisData() : null,
+            name: this.unit,
+            nameLocation: 'center',
+            nameTextStyle: {
+              color: '#8996a9',
+            },
           },
-          this.hiddenAxisLine ? hiddenAxis : {}
-        ),
+        ],
         series: this.getSeries(),
       }
       this.optionsResult = merge(
         {},
-        optionsSingleYBase(this.unit), //基本options
+        optionsSingleYBase, //基本options
         options, //生成的options
         this.options //外部传入的options
       )
@@ -287,11 +300,11 @@ export default {
             if (d && d.color) {
               Object.assign(d, {
                 itemStyle: {
-                  color: this.setColor(d.color),
+                  color: setColor(d.color),
                 },
                 emphasis: {
                   itemStyle: {
-                    color: this.setColor(d.color),
+                    color: setColor(d.color),
                   },
                 },
               })
@@ -351,7 +364,7 @@ export default {
       let result = cloneDeep(seriesLine)
 
       /* line相关配置 */
-      result.color = this.setColor(color, 'Linear', [0, 0, 1, 0])
+      result.color = setColor(color, 'Linear', [0, 0, 1, 0])
       result.symbolSize = defaultLineConfig.symbolSize //4
       result.emphasis = {
         itemStyle: {
@@ -378,7 +391,7 @@ export default {
             bgcolor = [setColorOpacity(bgcolor, 1), setColorOpacity(bgcolor, 0.1)]
           }
           /* 背景颜色 */
-          result.areaStyle.color = this.setColor(bgcolor)
+          result.areaStyle.color = setColor(bgcolor)
           /* 背景透明度 */
           result.areaStyle.opacity = item.bgOpaticy ?? defaultLineConfig.bgOpaticy //1
         }
@@ -404,7 +417,8 @@ export default {
       /* 柱子圆角 */
       result.itemStyle.barBorderRadius = item.barRadius || defaultBarConfig.barBorderRadius
       /* 柱子颜色 */
-      result.itemStyle.color = this.setColor(color)
+      let derection = this.isRow ? [0, 0, 1, 0] : [0, 0, 0, 1]
+      result.itemStyle.color = setColor(color, 'Linear', derection)
       /* 柱子背景 */
       result.showBackground = item.withBg || defaultBarConfig.showBackground
       result.backgroundStyle = {
@@ -430,7 +444,7 @@ export default {
       }
       /* 配置颜色 */
       Object.assign(result.itemStyle, {
-        color: this.setColor(color, 'Radial'),
+        color: setColor(color, 'Radial'),
       })
       /* 配置堆叠serise */
       result.stack = item.stack || defaultLineConfig.stack // null
@@ -443,46 +457,9 @@ export default {
       if (!Array.isArray(color) && item.isGradient) {
         color = [color, setColorOpacity(color, 0.1)]
       }
-      result.itemStyle.color = this.setColor(color)
+      result.itemStyle.color = setColor(color)
 
       return result
-    },
-    /**
-     * 给颜色加透明度
-     * @param {String|Array} color
-     * @param {String} type
-     * @param {Array} derection [0, 0, 0, 1] 左 上 右 下
-     */
-    setColor(color, type = 'Linear', derection = [0, 0, 0, 1]) {
-      const colorArr = Array.isArray(color) ? color : [color, color]
-      if (type === 'Linear') {
-        if (this.isRow) {
-          derection = [0, 0, 1, 0]
-        }
-        return new ECharts.graphic.LinearGradient(...derection, [
-          {
-            offset: 0,
-            color: colorArr[0],
-          },
-          {
-            offset: 1,
-            color: colorArr[1],
-          },
-        ])
-      } else if (type === 'Radial') {
-        return new ECharts.graphic.RadialGradient(0.4, 0.3, 1, [
-          {
-            offset: 0,
-            color: colorArr[0],
-          },
-          {
-            offset: 1,
-            color: colorArr[1],
-          },
-        ])
-      } else {
-        return Array.isArray(color) ? color[0] : color
-      }
     },
     setGradientColor(color, length) {
       let result = []

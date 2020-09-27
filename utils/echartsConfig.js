@@ -43,8 +43,8 @@ export const optionsBase = {
     show: true,
     type: 'scroll',
     itemWidth: 18,
-    width: '90%',
-    height: '90%',
+    width: '80%',
+    height: '80%',
     top: 8,
     left: 'center',
     textStyle: {
@@ -64,33 +64,33 @@ export const optionsBase = {
   },
 }
 
-export function optionsSingleYBase(unit) {
-  return Object.assign({}, optionsBase, {
-    /* xAxis */
-    xAxis: {
-      type: 'category',
-      axisLine: {
-        show: false,
-      },
-      axisTick: {
-        show: false,
-      },
-      axisLabel: {
-        color: '#8996a9',
-        margin: 10,
-        lineHeight: 14,
-        formatter(params) {
-          if (params.length > 7) {
-            return params.substring(0, 7) + '\n' + params.substring(7)
-          } else {
-            return params
-          }
-        },
-      },
-      data: [],
+export const optionsSingleYBase = Object.assign({}, optionsBase, {
+  /* xAxis */
+  xAxis: {
+    type: 'category',
+    axisLine: {
+      show: false,
     },
-    /* yAxis */
-    yAxis: {
+    axisTick: {
+      show: false,
+    },
+    axisLabel: {
+      color: '#8996a9',
+      margin: 10,
+      lineHeight: 14,
+      formatter(params) {
+        if (params.length > 7) {
+          return params.substring(0, 7) + '\n' + params.substring(7)
+        } else {
+          return params
+        }
+      },
+    },
+    data: [],
+  },
+  /* yAxis */
+  yAxis: [
+    {
       type: 'value',
       axisLine: {
         show: false,
@@ -100,9 +100,6 @@ export function optionsSingleYBase(unit) {
       },
       axisLabel: {
         color: '#8996a9',
-        formatter(val) {
-          return getyUnit(val, unit)
-        },
       },
       splitLine: {
         lineStyle: {
@@ -110,8 +107,22 @@ export function optionsSingleYBase(unit) {
         },
       },
     },
-  })
-}
+    {
+      axisLine: {
+        show: false,
+      },
+      axisTick: {
+        show: false,
+      },
+      axisLabel: {
+        show: false,
+      },
+      splitLine: {
+        show: false,
+      },
+    },
+  ],
+})
 
 export const hiddenAxis = {
   axisLine: {

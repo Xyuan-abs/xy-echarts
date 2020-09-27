@@ -1,9 +1,10 @@
 <template>
   <div class="single-y flex">
-    <card-panel v-for="(d, i) in list" :key="i">
+    <card-panel v-for="(d, i) in list" :key="i" :code="d">
       <xy-chart-single-y
         :list="d"
         :is-row="d[0].isRow"
+        :unit="unit"
         :hidden-axis-line="d[0].hiddenAxisLine"
       ></xy-chart-single-y>
     </card-panel>
@@ -21,6 +22,7 @@ export default {
   components: { CardPanel },
   data() {
     return {
+      unit: '单位：个',
       list: [
         [
           {
@@ -30,6 +32,8 @@ export default {
               { name: '2月', value: 10 },
               { name: '3月', value: 13 },
               { name: '4月', value: 10 },
+              { name: '5月', value: 13 },
+              { name: '6月', value: 10 },
             ],
             type: 'line',
             smooth: false,

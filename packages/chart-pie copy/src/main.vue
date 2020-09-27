@@ -1,11 +1,11 @@
 <!--
-名称：xy-chart-radar
+名称：xy-chart-Gauge
 版本：1.0.0
 作者：谢元将
 时间：2020年8月24日11:41:13 
 -->
 <template>
-  <div class="xy-chart-radar">
+  <div class="xy-chart-gauge">
     <xy-chart-base
       ref="ChartBase"
       :has-data="hasData"
@@ -25,13 +25,25 @@
 import XyChartBase from '../../chart-base/src/main'
 
 import { optionsBase, getTooltipFmt } from '../../../utils/echartsConfig'
-import { colors } from '../../../utils/echartsCommon'
+
 /* lodash 按需引入 */
 import merge from 'lodash/merge'
 import cloneDeep from 'lodash/cloneDeep'
 
+const labelCenter = {
+  label: {
+    show: false,
+    position: 'center',
+  },
+  emphasis: {
+    label: {
+      show: true,
+    },
+  },
+}
+
 export default {
-  name: 'XyChartRadar',
+  name: 'XyChartGauge',
   components: {
     XyChartBase,
   },
@@ -54,12 +66,14 @@ export default {
       },
     }, //data
     options: { type: Object, default: () => ({}) }, //自定义options
-    colors: { type: Array, default: () => colors }, //颜色表
+    colors: {
+      type: Array,
+      default: () => ['#0885ff', '#ff665e', '#f69421', '#1dcf2f', '#00bd98', '#00bcd4'],
+    }, //颜色表
     showLegend: { type: Boolean, default: true }, //是否显示legend
     legendPosition: { type: String, default: 'left' }, //legend位置
-    radarAxisColor: { type: [String, Array], default: '#ccc' }, //雷达轴坐标颜色
-    isBgGradient: { type: Boolean, default: false }, //背景是否渐变
-    indicator: { type: Array, default: null }, //
+    showLabel: { type: Boolean, default: true }, //是否显示label
+    labelPosition: { type: String, default: 'outside' }, //legend位置
     unit: { type: String, default: '单位：万元' }, //单位
     noDataMessage: { type: String, default: '暂无数据' }, //没有数据时显示的提示文字
   },
@@ -91,37 +105,10 @@ export default {
   methods: {
     init() {
       this.listResult = cloneDeep(this.list).map(d => d) //深度拷贝list
-      this.completion()
-      if (this.listResult.length) {
-        this.render() //配置echarts图表
-      }
-    },
-    /* 补全数据 */
-    completion() {
-      /* 获取到所有data里的name */
-      let all = this.listResult.reduce((prev, cur) => {
-        let names = cur.data.map(d => d.name)
-        return prev.concat(names)
-      }, [])
-      /* 去重 */
-      let filter = Array.from(new Set(all))
-      /* 补全 */
-      this.listResult.forEach(d => {
-        if (d.data.length !== filter.length) {
-          filter.forEach((v, i) => {
-            if (!d.data.find(o => o.name === v)) {
-              d.data.splice(i, 0, {
-                name: v,
-                value: null,
-              })
-            }
-          })
-        }
-      })
+      this.render() //配置echarts图表
     },
     render() {
       const options = {
-        // backgroundColor: '#101736',
         title: {
           show: Boolean(this.title),
           text: this.title,
@@ -145,34 +132,6 @@ export default {
           left: this.legendPosition,
           data: this.getLegendData(),
         },
-        radar: {
-          radius: '70%',
-          // shape: 'circle',
-          splitLine: {
-            lineStyle: {
-              color: this.radarAxisColor,
-            },
-          },
-          splitArea: {
-            show: false,
-          },
-          axisLine: {
-            lineStyle: {
-              color: Array.isArray(this.radarAxisColor)
-                ? this.radarAxisColor[0]
-                : this.radarAxisColor,
-            },
-          },
-          name: {
-            textStyle: {
-              color: Array.isArray(this.radarAxisColor)
-                ? this.radarAxisColor[0]
-                : this.radarAxisColor,
-            },
-          },
-
-          indicator: this.indicator || this.getIndicator(),
-        },
         series: this.getSeries(),
       }
       this.optionsResult = merge(
@@ -186,68 +145,60 @@ export default {
     /* 获取所有图例data */
     getLegendData() {
       let result = null
-      result = this.listResult.map(d => d.name)
 
+      if (this.listResult) {
+        result = this.listResult[0].data.map(d => d.name)
+      }
       return result
-    },
-    getIndicator() {
-      let max = this.listResult.reduce((prev, cur) => {
-        let result = []
-        if (!prev.length) {
-          result = cur.data.map(d => d.value)
-        } else {
-          result = cur.data.map((d, i) => d.value + prev[i])
-        }
-        return result
-      }, [])
-      return this.listResult[0].data.map((d, i) => ({
-        name: d.name,
-        max: max[i],
-      }))
     },
     getSeries() {
       let series = {
-        name: '',
-        type: 'radar',
+        name: this.list[0].name,
+        type: 'Gauge',
+        radius: this.showLabel ? ['40%', '60%'] : ['60%', '85%'],
+        center: ['50%', '50%'],
+        avoidLabelOverlap: true,
+        label: {
+          show: this.showLabel,
+          position: this.labelPosition,
+          fontWeight: 'bold',
+          lineHeight: 14,
+          formatter(val) {
+            return val.data.label || val.name + '\n' + val.percent + '%'
+          },
+        },
+        labelLine: {
+          normal: {
+            show: true,
+            lineStyle: {
+              width: 2,
+            },
+          },
+        },
+        itemStyle: {
+          borderColor: '#fff',
+          borderWidth: 2,
+        },
         data: this.getSeriesData(),
+      }
+      if (this.showLabel && this.labelPosition === 'center') {
+        merge(series, labelCenter)
       }
       return [series]
     },
+    getCenter() {
+      const defaultCenter = ['50%', '50%']
+      if (!this.showLegend) {
+        return defaultCenter
+      } else {
+        return [this.isLegendLeft ? '60%' : '40%', '50%']
+      }
+    },
     getSeriesData() {
       let result = null
-      result = this.listResult.map((d, i) => ({
-        name: d.name,
-        value: d.data.map(v => v.value),
-        areaStyle: this.isBgGradient
-          ? {
-              // 单项区域填充样式
-              color: {
-                type: 'linear',
-                x: 0, //右
-                y: 0, //下
-                x2: 1, //左
-                y2: 1, //上
-                colorStops: [
-                  {
-                    offset: 0,
-                    color: this.colors[i],
-                  },
-                  {
-                    offset: 0.5,
-                    color: 'rgba(255,255,255,0)',
-                  },
-                  {
-                    offset: 1,
-                    color: this.colors[i],
-                  },
-                ],
-                globalCoord: false,
-              },
-              opacity: 1, // 区域透明度
-            }
-          : { opacity: 0.1 },
-      }))
-
+      if (this.listResult) {
+        result = this.listResult[0].data
+      }
       return result
     },
     /* 事件 */
@@ -261,7 +212,7 @@ export default {
 }
 </script>
 <style lang="scss" scoped>
-.xy-chart-radar {
+.xy-chart-gauge {
   font-size: inherit;
   width: 100%;
   height: 100%;

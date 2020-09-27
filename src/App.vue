@@ -80,7 +80,7 @@ export default {
     padding: 12px 8px;
     > .flex {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: flex-start;
       flex-flow: row wrap;
     }

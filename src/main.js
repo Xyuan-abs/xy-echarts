@@ -18,7 +18,19 @@ Vue.config.productionTip = false
 // Vue.use(XyEcharts)
 
 import XyEcharts from '../packages/index'
-let { Base, SingleY, AngleBar, Pie, PieNested, PieRose, PieYujue, Radar } = XyEcharts
+let {
+  Base,
+  SingleY,
+  AngleBar,
+  Pie,
+  PieNested,
+  PieRose,
+  PieYujue,
+  Radar,
+  Treemap,
+  Process,
+} = XyEcharts
+
 Vue.use(Base)
 Vue.use(SingleY)
 Vue.use(AngleBar)
@@ -27,6 +39,8 @@ Vue.use(PieNested)
 Vue.use(PieRose)
 Vue.use(PieYujue)
 Vue.use(Radar)
+Vue.use(Treemap)
+Vue.use(Process)
 
 // import { Line } from '../packages/index'
 // console.log(Line)
