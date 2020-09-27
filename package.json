@@ -1,6 +1,6 @@
 {
   "name": "xy-echarts",
-  "version": "0.1.6",
+  "version": "0.1.8",
   "description": "a vue project base on echarts",
   "main": "lib/xy-echarts.umd.min.js",
   "private": false,
